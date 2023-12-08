@@ -1,14 +1,8 @@
-const proxy = new Proxy({
-  '/': {
-    target: 'https://ph.jaraim.top',
-    changeOrigin: true
+async fetch(request, env) {
+  let url = new URL(request.url);
+  if (url.pathname.match(/^\/|\/api\/*/)) {
+    url.hostname = 'ph.jaraim.top'
+    let new_request = new Request(url, request);
+    return fetch(new_request);
   }
-}, {
-  onProxyReq: (proxyReq, req, res) => {
-    proxyReq.headers['X-Forwarded-Host'] = req.headers['Host']
-  }
-});
-
-async function fetch(request, env) {
-  return await fetch(proxy(request));
 }

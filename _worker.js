@@ -1,12 +1,14 @@
-async fetch(request, env) {
-  let url = new URL(request.url);
-  if (url.pathname.match(/^\/|\/api\/*/)) {
-    url.hostname = 'ph.jaraim.top'
-    let new_request = new Request(url, request, {
-      headers: {
-        'X-Forwarded-Host': url.hostname
-      }
-    });
-    return fetch(new_request);
+const proxy = new Proxy({
+  '/': {
+    target: 'https://ph.jaraim.top',
+    changeOrigin: true
   }
+}, {
+  onProxyReq: (proxyReq, req, res) => {
+    proxyReq.headers['X-Forwarded-Host'] = req.headers['Host']
+  }
+});
+
+async function fetch(request, env) {
+  return await fetch(proxy(request));
 }
